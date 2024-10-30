@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Form</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    
+    <div id="alert-message" class="alert d-none" role="alert"></div>
+
+    <form id="paymentForm">
+      <div class="form-group">
+        <label>Price (Amount)</label>
+        <input type="text" name="amount" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Currency</label>
+        <select name="currency" class="form-control">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="THB">THB</option>
+          <option value="HKD">HKD</option>
+          <option value="SGD">SGD</option>
+          <option value="AUD">AUD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Customer Full Name</label>
+        <input type="text" name="customerName" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Credit Card Holder Name</label>
+        <input type="text" name="card_name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Credit Card Number</label>
+        <input type="text" name="card_number" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Credit Card Expiration Month</label>
+        <input type="text" name="expiration_month" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Credit Card Expiration Year</label>
+        <input type="text" name="expiration_year" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Credit Card CVV</label>
+        <input type="text" name="cvv" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit Payment</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      
+      try {
+        const response = await fetch('/process-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        console.log('response  ', response);
+
+        const result = await response.json();
+        const alertMessage = document.getElementById('alert-message');
+
+        if (response.ok) {
+          alertMessage.classList.remove('d-none', 'alert-danger');
+          alertMessage.classList.add('alert-success');
+          alertMessage.textContent = result.message;
+        } else {
+          alertMessage.classList.remove('d-none', 'alert-success');
+          alertMessage.classList.add('alert-danger');
+          alertMessage.textContent = result.error || 'Payment failed. Please try again.';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        const alertMessage = document.getElementById('alert-message');
+        alertMessage.classList.remove('d-none', 'alert-success');
+        alertMessage.classList.add('alert-danger');
+        alertMessage.textContent = 'An error occurred. Please try again later.';
+      }
+    });
+  </script>
+</body>
+</html>
+
